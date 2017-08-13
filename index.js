@@ -16,16 +16,20 @@ User.findAll({
   // ],
   order: [
     ['userId']
-  ]
+  ],
+  limit: 100,
 }).then((users) => {
   winston.info('Number of total users:', users.length);
 
   AskiNow.init();
 
-  let user = AskiNow.User.createWithLegacyUser(users[0]);
-  return user.save();
+  return Promise.all(
+    users.map(
+      (user) => AskiNow.User.createWithLegacyUser(user).save()));
 }).then((res) => {
-  winston.info(res);
+  res.forEach((result) => {
+    winston.info(result);
+  })
 
   process.exit(0);
 }).catch((err) => {
